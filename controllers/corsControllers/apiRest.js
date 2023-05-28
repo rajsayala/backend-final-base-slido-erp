@@ -1,8 +1,4 @@
-/**
- *  Retrieves a single document by id.
- *  @param {string} req.params.id
- *  @returns {Document} Single Document
- */
+
 
 const moment = require('moment');
 
