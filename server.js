@@ -8,14 +8,28 @@ if (major < 14 || (major === 14 && minor <= 0)) {
   process.exit();
 }
 
-// import environmental variables from our variables.env file
 require('dotenv').config({ path: '.variables.env' });
 
-// Connect to our Database and handle any bad connections
-// mongoose.connect(process.env.DATABASE);
+const databaseURI = process.env.DATABASE;
+if (!databaseURI) {
+  console.error('Database connection URI is missing. Please check your environment variables.');
+  process.exit(1);
+}
 
-mongoose.connect(process.env.DATABASE);
-mongoose.Promise = global.Promise; // Tell Mongoose to use ES6 promises
+mongoose.connect(databaseURI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+  .then(() => {
+    console.log('Database connection successful');
+  })
+  .catch((err) => {
+    console.error(`Error connecting to the database: ${err.message}`);
+    process.exit(1);
+  });
+
+mongoose.Promise = global.Promise;
+
 mongoose.connection.on('error', (err) => {
   console.error(`🚫 Error → : ${err.message}`);
 });
@@ -27,7 +41,6 @@ glob.sync('./models/**/*.js').forEach(function (file) {
   require(path.resolve(file));
 });
 
-// Start our app!
 const app = require('./app');
 app.set('port', process.env.PORT || 8888);
 const server = app.listen(app.get('port'), () => {
